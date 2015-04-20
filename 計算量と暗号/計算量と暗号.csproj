@@ -7,7 +7,7 @@
     <ProjectGuid>{B79A9D7C-F587-4391-BCF1-D4D4B8A34F27}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>計算量と暗号</RootNamespace>
+    <RootNamespace>CalculationAndEncryption</RootNamespace>
     <AssemblyName>計算量と暗号</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithm.cs" />
+    <Compile Include="ListExtension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
