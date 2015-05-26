@@ -40,14 +40,20 @@ internal class Program
 
     Suudoku suudoku = new Suudoku(p.Count);
 
-    var r = suudoku.Solve(p);
-
-    //結果の表示
-    for(int j = 0; j < p.Count; ++j)
+    int[,] result;
+    if(suudoku.Solve(p, out result))
     {
-      for(int i = 0; i < p.Count; ++i)
-        Console.Write(r[j, i] + " ");
-      Console.WriteLine();
+      Console.WriteLine("解がありました");
+
+      //結果の表示
+      for(int j = 0; j < p.Count; ++j)
+      {
+        for(int i = 0; i < p.Count; ++i)
+          Console.Write(result[j, i] + " ");
+        Console.WriteLine();
+      }
     }
+    else
+      Console.WriteLine("解が見つかりませんでした");
   }
 }

@@ -11,6 +11,7 @@ internal class Suudoku
 {
   private readonly int N;
   private readonly int blockN;
+  private List<List<string>> ConditionsList;
 
   public Suudoku(int N)
   {
@@ -18,7 +19,20 @@ internal class Suudoku
     blockN = (int)Math.Sqrt(N);
   }
 
-  public int[,] Solve(List<List<string>> sudoku)
+  /// <summary>
+  /// <para>与えられた数独のリストから数独を解く</para>
+  /// <para>数独のリストは以下のように与えるものとする</para>
+  /// <para>   List{List{string}} p = new List{List{string}}(){</para>
+  /// <para>     new List{string}(){" "," ","1"," "},</para>
+  /// <para>     new List{string}(){" ","3"," ","4"},</para>
+  /// <para>     new List{string}(){"3"," ","4"," "},</para>
+  /// <para>     new List{string}(){" ","2"," "," "},</para>
+  ///     };
+  /// </summary>
+  /// <param name="sudoku">数独のリスト</param>
+  /// <param name="result">結果を格納する配列</param>
+  /// <returns></returns>
+  public bool Solve(List<List<string>> sudoku, out int[,] result)
   {
     /**************************************************
      * 各マスにN個の条件を付与
@@ -122,55 +136,57 @@ internal class Suudoku
     /**************************************************
      * Solverに渡すリストの作成
      **************************************************/
-    List<List<string>> solvList = new List<List<string>>();
+    ConditionsList = new List<List<string>>();
 
     foreach(var a in masCond)
       foreach(var b in a)
-        solvList.Add(b);
+        ConditionsList.Add(b);
     foreach(var a in rowCond)
       foreach(var b in a)
         foreach(var c in b)
-          solvList.Add(c);
+          ConditionsList.Add(c);
     foreach(var a in colCond)
       foreach(var b in a)
         foreach(var c in b)
-          solvList.Add(c);
+          ConditionsList.Add(c);
     foreach(var a in blockCond)
-      solvList.Add(a);
+      ConditionsList.Add(a);
     foreach(var a in sudoku.Select((v, i) => new { v, i }))
       foreach(var b in a.v.Select((v, i) => new { v, i }))
         if(!string.IsNullOrWhiteSpace(b.v))
-          solvList.Add(new List<string>() { a.i.ToString() + b.i.ToString() + int.Parse(b.v).ToString() });
+          ConditionsList.Add(new List<string>() { a.i.ToString() + b.i.ToString() + int.Parse(b.v).ToString() });
 
-    ////表示して確認
-    //StreamWriter s = new StreamWriter(Directory.GetCurrentDirectory() + "/f.txt");
-    //Console.SetOut(s);
-    foreach(var a in solvList.Select((v, i) => new { v, i }))
+    /**************************************************
+     * 結果を返す
+     **************************************************/
+
+    result = new int[N, N];
+    DefaultSolver solver = new DefaultSolver(ConditionsList);
+    if(solver.Solve())
+    {
+      var d = solver.Model;
+      foreach(var val in d.Where(_d => _d.Value == true).Select((v, i) => new { v, i }))
+        result[int.Parse(val.v.Key[0].ToString()), int.Parse(val.v.Key[1].ToString())] = int.Parse(val.v.Key[2].ToString());
+      return true;
+    }
+    else
+      Console.WriteLine("問題が解けませんでした。。。");
+
+    return false;
+  }
+
+  /// <summary>
+  /// ソルバに渡した条件を列挙する
+  /// </summary>
+  public void ShowConditions()
+  {
+    foreach(var a in ConditionsList.Select((v, i) => new { v, i }))
     {
       Console.Write(a.i + 1 + " :{ ");
       foreach(var b in a.v)
         Console.Write(b + " ,");
       Console.WriteLine(" }");
     }
-
-    /**************************************************
-     * 結果の配列を返す
-     **************************************************/
-
-    int[,] result = new int[N, N];
-    DefaultSolver solver = new DefaultSolver(solvList);
-    if(solver.Solve())
-    {
-      Console.WriteLine("問題が解けました");
-      var d = solver.Model;
-
-      foreach(var val in d.Where(_d => _d.Value == true).Select((v, i) => new { v, i }))
-        result[int.Parse(val.v.Key[0].ToString()), int.Parse(val.v.Key[1].ToString())] = int.Parse(val.v.Key[2].ToString());
-    }
-    else
-      Console.WriteLine("問題が解けませんでした。。。");
-
-    return result;
   }
 
   private static List<List<T>> Combinations<T>(IList<T> elements, int choose)
