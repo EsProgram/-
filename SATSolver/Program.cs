@@ -48,7 +48,7 @@ internal class Program
   /// </summary>
   private static string ArgumentPath(string[] args)
   {
-    var path = args.Where((v, i) => i > 0 && args[i - 1] == "-f").First();
+    var path = args.Where((v, i) => i > 0 && args[i - 1] == "-f").FirstOrDefault();
     return path;
   }
 
