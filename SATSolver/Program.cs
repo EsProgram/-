@@ -1,5 +1,4 @@
 ﻿using Microsoft.SolverFoundation.Solvers;
-using Poorsat;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,49 +10,69 @@ internal class Program
 {
   private static void Main(string[] args)
   {
-    List<List<string>> p = new List<List<string>>(){
-         new List<string>(){" "," ","1"," "},
-         new List<string>(){" ","3"," ","4"},
-         new List<string>(){"3"," ","4"," "},
-         new List<string>(){" ","2"," "," "},
-
-         //new List<string>(){" ","3"," "," "},
-         //new List<string>(){" ","4"," ","2"},
-         //new List<string>(){"3","2"," ","4"},
-         //new List<string>(){"4"," ","2"," "},
-
-         //new List<string>(){" ","4"," ","2"},
-         //new List<string>(){"1","2"," "," "},
-         //new List<string>(){" "," ","4","3"},
-         //new List<string>(){"4"," "," ","1"},
-
-         //new List<string>(){"3","7"," ","6"," ","9"," ","2","1"},
-         //new List<string>(){"4"," "," "," ","8"," "," "," ","3"},
-         //new List<string>(){" "," ","6","3"," ","5","7"," "," "},
-         //new List<string>(){"6"," ","4"," "," "," ","3"," ","9"},
-         //new List<string>(){" ","9"," "," ","3"," "," ","8"," "},
-         //new List<string>(){"2"," ","7"," "," "," ","1"," ","4"},
-         //new List<string>(){" "," ","1","9"," ","8","4"," "," "},
-         //new List<string>(){" "," "," "," ","6"," "," "," "," "},
-         //new List<string>(){"8","2"," ","1"," ","4"," ","9","5"},
-       };
-
-    Suudoku suudoku = new Suudoku(p.Count);
-
+    List<List<string>> puzzle = new List<List<string>>();
     int[,] result;
-    if(suudoku.Solve(p, out result))
+
+    if(args.Length > 0)
+    {
+      var path = ArgumentPath(args);
+      if(string.IsNullOrEmpty(path))
+      {
+        Console.WriteLine("コマンドライン引数が正しくありません");
+        return;
+      }
+      puzzle = CreatePuzzle(path);
+    }
+    else
+      puzzle = CreatePuzzle(Directory.GetCurrentDirectory() + "/puzzle.txt");
+    Sudoku sudoku = new Sudoku();
+
+    if(sudoku.Solve(puzzle, out result))
     {
       Console.WriteLine("解がありました");
 
       //結果の表示
-      for(int j = 0; j < p.Count; ++j)
+      for(int j = 0; j < puzzle.Count; ++j)
       {
-        for(int i = 0; i < p.Count; ++i)
+        for(int i = 0; i < puzzle.Count; ++i)
           Console.Write(result[j, i] + " ");
         Console.WriteLine();
       }
     }
     else
       Console.WriteLine("解が見つかりませんでした");
+  }
+
+  /// <summary>
+  /// コマンドライン引数に-fが入力されていた場合、ファイルを読み込む
+  /// </summary>
+  private static string ArgumentPath(string[] args)
+  {
+    var path = args.Where((v, i) => i > 0 && args[i - 1] == "-f").First();
+    return path;
+  }
+
+  private static List<List<string>> CreatePuzzle(string filePath)
+  {
+    List<List<string>> ret = new List<List<string>>();
+    using(StreamReader sr = new StreamReader(filePath))
+    {
+      string line;
+      int count = 0;
+      while(!sr.EndOfStream)
+      {
+        line = sr.ReadLine();
+        if(!string.IsNullOrWhiteSpace(line))
+        {
+          var lineSplit = line.Split(' ');
+          ret.Add(new List<string>());
+          foreach(var str in lineSplit)
+            ret[count].Add(str);
+          ++count;
+        }
+      }
+    }
+
+    return ret;
   }
 }
